@@ -67,10 +67,12 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
+    <!-- 列表视图 -->
     <el-table v-loading="loading" :data="partnerList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="序号" type="index" align="center" prop="id" width="50" />
       <el-table-column label="合作商名称" align="center" prop="name" />
+      <el-table-column label="点位数" align="center" prop="nodeCount" />
       <el-table-column label="账号" align="center" prop="account" />
       <el-table-column label="分成比例" align="center">
         <template #default="scope"> {{ scope.row.profitShare }}% </template>
