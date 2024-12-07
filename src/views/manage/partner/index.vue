@@ -80,12 +80,19 @@
       <!-- <el-table-column label="密码" align="center" prop="password" /> -->
       <el-table-column label="联系人" align="center" prop="contactPerson" />
       <el-table-column label="联系电话" align="center" prop="contactPhone" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="300px">
         <template #default="scope">
           <el-button
             link
             type="primary"
-            @click="handleDetail(scope.row)"
+            @click="handleResetPwd(scope.row)"
+            v-hasPermi="['manage:partner:edit']"
+            >重置密码</el-button
+          >
+          <el-button
+            link
+            type="primary"
+    @click="handleDetail(scope.row)"
             v-hasPermi="['manage:partner:query']"
             >查看详情</el-button
           >
@@ -169,7 +176,8 @@ import {
   getPartner,
   delPartner,
   addPartner,
-  updatePartner
+  updatePartner,
+  resetPwd
 } from '@/api/manage/partner'
 
 const { proxy } = getCurrentInstance()
@@ -322,6 +330,20 @@ function handleDelete(row) {
     .catch(() => {})
 }
 
+/** 重制密码 */
+function handleResetPwd(row) {
+  const _id = row.id
+  proxy.$modal
+    .confirm('您确定重制该合作商的密码吗？')
+    .then(() => {
+      return resetPwd(_id)
+    })
+    .then(() => {
+      proxy.$modal.msgSuccess('重置成功')
+    })
+    .catch(() => {})
+}
+
 /** 导出按钮操作 */
 function handleExport() {
   proxy.download(
@@ -336,7 +358,7 @@ function handleExport() {
 getList()
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .dialog-content {
   margin-bottom: 10px; /* 添加下方间距 */
   font-size: 14px; /* 提高可读性 */
