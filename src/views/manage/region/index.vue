@@ -1,6 +1,12 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form
+      :model="queryParams"
+      ref="queryRef"
+      :inline="true"
+      v-show="showSearch"
+      label-width="68px"
+    >
       <el-form-item label="区域名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -23,7 +29,8 @@
           icon="Plus"
           @click="handleAdd"
           v-hasPermi="['manage:region:add']"
-        >新增</el-button>
+          >新增</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -33,7 +40,8 @@
           :disabled="single"
           @click="handleUpdate"
           v-hasPermi="['manage:region:edit']"
-        >修改</el-button>
+          >修改</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -43,7 +51,8 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['manage:region:remove']"
-        >删除</el-button>
+          >删除</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -52,7 +61,8 @@
           icon="Download"
           @click="handleExport"
           v-hasPermi="['manage:region:export']"
-        >导出</el-button>
+          >导出</el-button
+        >
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -65,14 +75,33 @@
       <el-table-column label="备注说明" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" @click="handleUpdate(scope.row)" v-hasPermi="['manage:region:edit']">修改</el-button>
-          <el-button link type="primary" @click="handleDelete(scope.row)" v-hasPermi="['manage:region:remove']">删除</el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleDetailInfo(scope.row)"
+            v-hasPermi="['manage:node:list']"
+            >查看详情</el-button
+          >
+          <el-button
+            link
+            type="primary"
+            @click="handleUpdate(scope.row)"
+            v-hasPermi="['manage:region:edit']"
+            >修改</el-button
+          >
+          <el-button
+            link
+            type="primary"
+            @click="handleDelete(scope.row)"
+            v-hasPermi="['manage:region:remove']"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
 
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       v-model:page="queryParams.pageNum"
       v-model:limit="queryParams.pageSize"
@@ -96,57 +125,68 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 查看详情对话框 -->
+    <el-dialog v-model="openView" title="区域详情" width="500px" append-to-body>
+      <el-form-item label="区域名称" prop="name">
+        <el-input v-model="form.name" placeholder="请输入区域名称" disabled />
+      </el-form-item>
+      <label>包含点位：</label>
+      <el-table :data="nodeList">
+        <el-table-column label="序号" type="index" align="center" width="50" />
+        <el-table-column label="点位名称" align="center" prop="name" />
+        <el-table-column label="设备数量" align="center" prop="vmCount" />
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script setup name="Region">
-import { listRegion, getRegion, delRegion, addRegion, updateRegion } from "@/api/manage/region";
+import { listRegion, getRegion, delRegion, addRegion, updateRegion } from '@/api/manage/region'
+import { listNode } from '@/api/manage/node'
+import { loadAllParams } from '@/api/page'
 
-const { proxy } = getCurrentInstance();
+const { proxy } = getCurrentInstance()
 
-const regionList = ref([]);
-const open = ref(false);
-const loading = ref(true);
-const showSearch = ref(true);
-const ids = ref([]);
-const single = ref(true);
-const multiple = ref(true);
-const total = ref(0);
-const title = ref("");
+const regionList = ref([])
+const open = ref(false)
+const loading = ref(true)
+const showSearch = ref(true)
+const ids = ref([])
+const single = ref(true)
+const multiple = ref(true)
+const total = ref(0)
+const title = ref('')
 
 const data = reactive({
   form: {},
   queryParams: {
     pageNum: 1,
     pageSize: 10,
-    name: null,
+    name: null
   },
   rules: {
-    name: [
-      { required: true, message: "区域名称不能为空", trigger: "blur" }
-    ],
-    remark: [
-      { required: true, message: "备注说明不能为空", trigger: "blur" }
-    ]
+    name: [{ required: true, message: '区域名称不能为空', trigger: 'blur' }],
+    remark: [{ required: true, message: '备注说明不能为空', trigger: 'blur' }]
   }
-});
+})
 
-const { queryParams, form, rules } = toRefs(data);
+const { queryParams, form, rules } = toRefs(data)
 
 /** 查询区域管理列表 */
 function getList() {
-  loading.value = true;
+  loading.value = true
   listRegion(queryParams.value).then(response => {
-    regionList.value = response.rows;
-    total.value = response.total;
-    loading.value = false;
-  });
+    regionList.value = response.rows
+    total.value = response.total
+    loading.value = false
+  })
 }
 
 // 取消按钮
 function cancel() {
-  open.value = false;
-  reset();
+  open.value = false
+  reset()
 }
 
 // 表单重置
@@ -159,85 +199,113 @@ function reset() {
     createBy: null,
     updateBy: null,
     remark: null
-  };
-  proxy.resetForm("regionRef");
+  }
+  proxy.resetForm('regionRef')
 }
 
 /** 搜索按钮操作 */
 function handleQuery() {
-  queryParams.value.pageNum = 1;
-  getList();
+  queryParams.value.pageNum = 1
+  getList()
 }
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef");
-  handleQuery();
+  proxy.resetForm('queryRef')
+  handleQuery()
 }
 
 // 多选框选中数据
 function handleSelectionChange(selection) {
-  ids.value = selection.map(item => item.id);
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
+  ids.value = selection.map(item => item.id)
+  single.value = selection.length != 1
+  multiple.value = !selection.length
 }
 
 /** 新增按钮操作 */
 function handleAdd() {
-  reset();
-  open.value = true;
-  title.value = "添加区域管理";
+  reset()
+  open.value = true
+  title.value = '添加区域管理'
 }
 
 /** 修改按钮操作 */
 function handleUpdate(row) {
-  reset();
+  reset()
   const _id = row.id || ids.value
   getRegion(_id).then(response => {
-    form.value = response.data;
-    open.value = true;
-    title.value = "修改区域管理";
-  });
+    form.value = response.data
+    open.value = true
+    title.value = '修改区域管理'
+  })
+}
+
+const nodeList = ref([]) // 点位列表
+const openView = ref(false) // 区域详情弹窗开关
+/** 查看区域详情 */
+function handleDetailInfo(row) {
+  // 查看区域信息
+  reset()
+  const _id = row.id
+  getRegion(_id).then(response => {
+    form.value = response.data
+  })
+  // 查看点位列表
+  const params = { ...loadAllParams, regionId: _id }
+  listNode(params)
+    .then(res => {
+      nodeList.value = res.rows
+    })
+    .catch(() => {})
+  openView.value = true
 }
 
 /** 提交按钮 */
 function submitForm() {
-  proxy.$refs["regionRef"].validate(valid => {
+  proxy.$refs['regionRef'].validate(valid => {
     if (valid) {
       if (form.value.id != null) {
         updateRegion(form.value).then(response => {
-          proxy.$modal.msgSuccess("修改成功");
-          open.value = false;
-          getList();
-        });
+          proxy.$modal.msgSuccess('修改成功')
+          open.value = false
+          getList()
+        })
       } else {
         addRegion(form.value).then(response => {
-          proxy.$modal.msgSuccess("新增成功");
-          open.value = false;
-          getList();
-        });
+          proxy.$modal.msgSuccess('新增成功')
+          open.value = false
+          getList()
+        })
       }
     }
-  });
+  })
 }
 
 /** 删除按钮操作 */
 function handleDelete(row) {
-  const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除区域管理编号为"' + _ids + '"的数据项？').then(function() {
-    return delRegion(_ids);
-  }).then(() => {
-    getList();
-    proxy.$modal.msgSuccess("删除成功");
-  }).catch(() => {});
+  const _ids = row.id || ids.value
+  proxy.$modal
+    .confirm('是否确认删除区域管理编号为"' + _ids + '"的数据项？')
+    .then(function () {
+      return delRegion(_ids)
+    })
+    .then(() => {
+      getList()
+      proxy.$modal.msgSuccess('删除成功')
+    })
+    .catch(() => {})
 }
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('manage/region/export', {
-    ...queryParams.value
-  }, `region_${new Date().getTime()}.xlsx`)
+  proxy.download(
+    'manage/region/export',
+    {
+      ...queryParams.value
+    },
+    `region_${new Date().getTime()}.xlsx`
+  )
 }
 
-getList();
+getList()
 </script>

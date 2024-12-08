@@ -94,14 +94,14 @@
     <el-table v-loading="loading" :data="nodeList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="序号" type="index" align="center" width="50" />
-      <el-table-column label="区域 ID" align="center" prop="regionId" />
       <el-table-column label="点位名称" align="center" prop="name" />
+      <el-table-column label="区域" align="center" prop="region.name" />
       <el-table-column label="商圈类型" align="center" prop="businessDistrictType">
         <template #default="scope">
           <dict-tag :options="business_type" :value="scope.row.businessDistrictType" />
         </template>
       </el-table-column>
-      <el-table-column label="合作商 ID" align="center" prop="partnerId" />
+      <el-table-column label="合作商" align="center" prop="partner.name" />
       <el-table-column label="详细地址" align="center" prop="address" show-overflow-tooltip />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
