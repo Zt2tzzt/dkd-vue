@@ -108,6 +108,13 @@
           <el-button
             link
             type="primary"
+            @click="handleVmInfo(scope.row)"
+            v-hasPermi="['manage:vm:list']"
+            >查看详情</el-button
+          >
+          <el-button
+            link
+            type="primary"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['manage:node:edit']"
             >修改</el-button
@@ -180,6 +187,25 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 查看详情对话框 -->
+    <el-dialog title="vmInfoTitle" v-model="vmInfoOpen" width="750px" append-to-body>
+      <el-table :data="vmList">
+        <el-table-column label="序号" type="index" align="center" width="50" />
+        <el-table-column label="设备编号" align="center" prop="innerCode" />
+        <el-table-column label="详细地址" align="center" prop="addr" show-overflow-tooltip />
+        <el-table-column label="设备状态" align="center" prop="vmStatus">
+          <template #default="scope">
+            <dict-tag :options="vm_status" :value="scope.row.vmStatus" />
+          </template>
+        </el-table-column>
+        <el-table-column label="最后一次供货时间" align="center" prop="lastSupplyTime">
+          <template #default="scope">
+            {{ parseTime(scope.row.lastSupplyTime) }}
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -188,10 +214,13 @@ import { ref } from 'vue'
 import { listNode, getNode, delNode, addNode, updateNode } from '@/api/manage/node'
 import { listRegion } from '@/api/manage/region'
 import { listPartner } from '@/api/manage/partner'
+import { listVm } from '@/api/manage/vm'
 import { loadAllParams } from '@/api/page'
+// import { parseTime } from 'element-plus/es/components/time-select/src/utils.mjs'
 
 const { proxy } = getCurrentInstance()
 const { business_type } = proxy.useDict('business_type')
+const { vm_status } = proxy.useDict('vm_status')
 
 const nodeList = ref([])
 const open = ref(false)
@@ -307,6 +336,20 @@ function handleUpdate(row) {
     form.value = response.data
     open.value = true
     title.value = '修改点位管理'
+  })
+}
+
+/** 查看详情按钮操作 */
+const vmList = ref([])
+const vmInfoOpen = ref(false)
+const vmInfoTitle = ref('')
+const handleVmInfo = row => {
+  const _id = row.id
+  const param = { ...loadAllParams, nodeId: _id }
+  listVm(param).then(res => {
+    vmList.value = res.rows
+    vmInfoOpen.value = true
+    vmInfoTitle.value = '点位详情'
   })
 }
 

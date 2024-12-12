@@ -22,78 +22,45 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['manage:vm:add']"
-          >新增</el-button
-        >
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['manage:vm:edit']"
-          >修改</el-button
-        >
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['manage:vm:remove']"
-          >删除</el-button
-        >
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['manage:vm:export']"
-          >导出</el-button
-        >
-      </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <el-table v-loading="loading" :data="vmList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
       <el-table-column label="序号" type="index" align="center" width="50" />
       <el-table-column label="设备编号" align="center" prop="innerCode" />
-      <el-table-column label="设备型号" align="center" prop="vmTypeId" #default="scope">
-        <template v-for="item of vmTypeList" :key="item.id">
-          <span v-if="item.id === scope.row.vmTypeId">{{ item.name }}</span>
+      <el-table-column label="设备型号" align="center" prop="vmTypeId">
+        <template #default="scope">
+          <template v-for="item of vmTypeList" :key="item.id">
+            <span v-if="item.id === scope.row.vmTypeId">{{ item.name }}</span>
+          </template>
         </template>
       </el-table-column>
       <el-table-column label="详细地址" align="center" prop="addr" show-overflow-tooltip />
-      <el-table-column label="合作商" align="center" prop="partnerId" #default="scope">
-        <template v-for="item of partnerList" :key="item.id">
-          <span v-if="item.id === scope.row.partnerId">{{ item.name }}</span>
+      <el-table-column label="设备状态" align="center" prop="vmStatus">
+        <template #default="scope">
+          <dict-tag :options="vm_status" :value="scope.row.vmStatus" />
         </template>
       </el-table-column>
-      <el-table-column label="设备状态" align="center" prop="vmStatus" #default="scope">
-        <dict-tag :options="vm_status" :value="scope.row.vmStatus" />
+      <el-table-column label="运营状态" align="center" prop="vmStatus">
+        <template #default="scope">
+          <!-- <dict-tag :options="vm_status" :value="scope.row.vmStatus" /> -->
+          {{
+            scope.row.runningStatus
+              ? JSON.parse(scope.row.runningStatus).status
+                ? '正常'
+                : '异常'
+              : '异常'
+          }}
+        </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button
             link
             type="primary"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['manage:vm:edit']"
-            >修改</el-button
+            @click="handleVmInfo(scope.row)"
+            v-hasPermi="['manage:vm:query']"
+            >查看详情</el-button
           >
         </template>
       </el-table-column>
@@ -107,67 +74,8 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改设备管理对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="vmRef" :model="form" :rules="rules" label-width="110px">
-        <el-form-item label="设备编号" prop="innerCode">
-          <!-- <el-input v-model="form.innerCode" placeholder="请输入设备编号" /> -->
-          <span>{{ form.innerCode ? form.innerCode : '系统自动生成' }}</span>
-        </el-form-item>
-        <el-form-item v-if="form.innerCode" label="供货时间">
-          <span>{{ parseTime(form.lastSupplyTime) }}</span>
-        </el-form-item>
-        <el-form-item v-if="form.innerCode" label="设备类型">
-          <template v-for="item of vmTypeList" :key="item.id">
-            <span v-if="item.id === form.vmTypeId">{{ item.name }}</span>
-          </template>
-        </el-form-item>
-        <el-form-item v-if="form.innerCode" label="设备容量">
-          <span>{{ form.channelMaxCapacity }}</span>
-        </el-form-item>
-        <el-form-item v-if="!form.innerCode" item label="选择型号" prop="vmTypeId">
-          <!-- <el-input v-model="form.vmTypeId" placeholder="请输入设备型号" /> -->
-          <el-select v-model="form.vmTypeId" placeholder="选择型号">
-            <el-option
-              v-for="item in vmTypeList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="选择点位" prop="nodeId">
-          <!-- <el-input v-model="form.nodeId" placeholder="请输入点位Id" /> -->
-          <el-select v-model="form.nodeId" placeholder="请选择点位">
-            <el-option
-              v-for="item in nodeList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item v-if="form.innerCode" label="合作商">
-          <template v-for="item of partnerList" :key="item.id">
-            <span v-if="item.id === form.partnerId">{{ item.name }}</span>
-          </template>
-        </el-form-item>
-        <el-form-item v-if="form.innerCode" label="区域">
-          <template v-for="item of regionList" :key="item.id">
-            <span v-if="item.id === form.regionId">{{ item.name }}</span>
-          </template>
-        </el-form-item>
-        <el-form-item v-if="form.innerCode" label="设备地址">
-          <span>{{ form.addr }}</span>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
-        </div>
-      </template>
-    </el-dialog>
+    <!-- 查看详情 -->
+    <el-dialog :title="title" v-model="open" width="500px" append-to-body> </el-dialog>
   </div>
 </template>
 
@@ -277,14 +185,14 @@ function handleSelectionChange(selection) {
 }
 
 /** 新增按钮操作 */
-function handleAdd() {
+/* function handleAdd() {
   reset()
   open.value = true
   title.value = '添加设备管理'
-}
+} */
 
 /** 修改按钮操作 */
-function handleUpdate(row) {
+/* function handleUpdate(row) {
   reset()
   const _id = row.id || ids.value
   getVm(_id).then(response => {
@@ -292,6 +200,14 @@ function handleUpdate(row) {
     open.value = true
     title.value = '修改设备管理'
   })
+} */
+
+/** 查看详情操作 */
+const handleVmInfo = row => {
+  const _id = row.id
+
+  open.value = true
+  title.value = '设备详情'
 }
 
 /** 提交按钮 */
@@ -316,7 +232,7 @@ function submitForm() {
 }
 
 /** 删除按钮操作 */
-function handleDelete(row) {
+/* function handleDelete(row) {
   const _ids = row.id || ids.value
   proxy.$modal
     .confirm('是否确认删除设备管理编号为"' + _ids + '"的数据项？')
@@ -328,10 +244,10 @@ function handleDelete(row) {
       proxy.$modal.msgSuccess('删除成功')
     })
     .catch(() => {})
-}
+} */
 
 /** 导出按钮操作 */
-function handleExport() {
+/* function handleExport() {
   proxy.download(
     'manage/vm/export',
     {
@@ -339,7 +255,7 @@ function handleExport() {
     },
     `vm_${new Date().getTime()}.xlsx`
   )
-}
+} */
 
 /** 查询设备类型列表 */
 const vmTypeList = ref([])
