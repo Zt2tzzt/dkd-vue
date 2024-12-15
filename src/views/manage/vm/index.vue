@@ -91,6 +91,13 @@
           <el-button
             link
             type="primary"
+            @click="handlePolicy(scope.row)"
+            v-hasPermi="['manage:vm:edit']"
+            >策略</el-button
+          >
+          <el-button
+            link
+            type="primary"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['manage:vm:edit']"
             >修改</el-button
@@ -168,6 +175,28 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 策略分配对话框 -->
+    <el-dialog title="策略分配" v-model="policyOpen" width="500px" append-to-body>
+      <el-form ref="vmRef" :model="form" label-width="110px">
+        <el-form-item label="选择策略" prop="policyId">
+          <el-select v-model="form.policyId" placeholder="请选择策略">
+            <el-option
+              v-for="item of policyList"
+              :key="item.policyId"
+              :label="item.policyName"
+              :value="item.policyId"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="submitForm">确 定</el-button>
+          <el-button @click="cancel">取 消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -177,6 +206,7 @@ import { listVmType } from '@/api/manage/vmType'
 import { listPartner } from '@/api/manage/partner'
 import { listNode } from '@/api/manage/node'
 import { listRegion } from '@/api/manage/region'
+import { listPolicy } from '@/api/manage/policy';
 import { loadAllParams } from '@/api/page'
 // import { parseTime } from 'element-plus/es/components/time-select/src/utils.mjs'
 
@@ -229,6 +259,7 @@ function getList() {
 // 取消按钮
 function cancel() {
   open.value = false
+  policyOpen.value = false
   reset()
 }
 
@@ -294,6 +325,20 @@ function handleUpdate(row) {
   })
 }
 
+/** 设备策略分配 */
+const policyOpen = ref(false)
+const policyList = ref([])
+const handlePolicy = row => {
+  // 为表单赋值策略 id 和设备 id
+  form.value.id = row.id
+  form.value.policyId = row.policyId
+  // 查询策略列表
+  listPolicy(loadAllParams).then(res => {
+    policyList.value = res.rows
+    policyOpen.value = true
+  })
+}
+
 /** 提交按钮 */
 function submitForm() {
   proxy.$refs['vmRef'].validate(valid => {
@@ -302,12 +347,14 @@ function submitForm() {
         updateVm(form.value).then(response => {
           proxy.$modal.msgSuccess('修改成功')
           open.value = false
+          policyOpen.value = false
           getList()
         })
       } else {
         addVm(form.value).then(response => {
           proxy.$modal.msgSuccess('新增成功')
           open.value = false
+          policyOpen.value = false
           getList()
         })
       }
