@@ -1,18 +1,16 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form
+      :model="queryParams"
+      ref="queryRef"
+      :inline="true"
+      v-show="showSearch"
+      label-width="68px"
+    >
       <el-form-item label="商品名称" prop="skuName">
         <el-input
           v-model="queryParams.skuName"
           placeholder="请输入商品名称"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="商品类型Id" prop="classId">
-        <el-input
-          v-model="queryParams.classId"
-          placeholder="请输入商品类型Id"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -31,7 +29,8 @@
           icon="Plus"
           @click="handleAdd"
           v-hasPermi="['manage:sku:add']"
-        >新增</el-button>
+          >新增</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -41,7 +40,8 @@
           :disabled="single"
           @click="handleUpdate"
           v-hasPermi="['manage:sku:edit']"
-        >修改</el-button>
+          >修改</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -51,7 +51,8 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['manage:sku:remove']"
-        >删除</el-button>
+          >删除</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -60,39 +61,58 @@
           icon="Download"
           @click="handleExport"
           v-hasPermi="['manage:sku:export']"
-        >导出</el-button>
+          >导出</el-button
+        >
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <el-table v-loading="loading" :data="skuList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="skuId" />
+      <el-table-column label="序号" type="index" width="50" align="center" />
       <el-table-column label="商品名称" align="center" prop="skuName" />
       <el-table-column label="商品图片" align="center" prop="skuImage" width="100">
         <template #default="scope">
-          <image-preview :src="scope.row.skuImage" :width="50" :height="50"/>
+          <image-preview :src="scope.row.skuImage" :width="50" :height="50" />
         </template>
       </el-table-column>
       <el-table-column label="品牌" align="center" prop="brandName" />
-      <el-table-column label="规格(净含量)" align="center" prop="unit" />
-      <el-table-column label="商品价格，单位分" align="center" prop="price" />
-      <el-table-column label="商品类型Id" align="center" prop="classId" />
+      <el-table-column label="规格" align="center" prop="unit" />
+      <el-table-column label="商品价格" align="center" prop="price" #default="scope">
+        <el-tag> {{ scope.row.price / 100 }} 元 </el-tag>
+      </el-table-column>
+      <el-table-column label="商品类型" align="center" prop="classId" #default="scope">
+        <template v-for="item of skuClassOptions" :key="item.classId">
+          <div v-if="item.classId === scope.row.classId">{{ item.className }}</div>
+        </template>
+      </el-table-column>
       <el-table-column label="创建时间" align="center" prop="createTime" width="180">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['manage:sku:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['manage:sku:remove']">删除</el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleUpdate(scope.row)"
+            v-hasPermi="['manage:sku:edit']"
+            >修改</el-button
+          >
+          <el-button
+            link
+            type="primary"
+            @click="handleDelete(scope.row)"
+            v-hasPermi="['manage:sku:remove']"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       v-model:page="queryParams.pageNum"
       v-model:limit="queryParams.pageSize"
@@ -105,20 +125,35 @@
         <el-form-item label="商品名称" prop="skuName">
           <el-input v-model="form.skuName" placeholder="请输入商品名称" />
         </el-form-item>
-        <el-form-item label="商品图片" prop="skuImage">
-          <image-upload v-model="form.skuImage"/>
-        </el-form-item>
         <el-form-item label="品牌" prop="brandName">
           <el-input v-model="form.brandName" placeholder="请输入品牌" />
         </el-form-item>
-        <el-form-item label="规格(净含量)" prop="unit">
-          <el-input v-model="form.unit" placeholder="请输入规格(净含量)" />
+        <el-form-item label="商品价格" prop="price">
+          <el-input-number
+            v-model="form.price"
+            :min="0.01"
+            :max="999.99"
+            :precision="2"
+            :step="0.5"
+            placeholder="请输入商品价格"
+          />
         </el-form-item>
-        <el-form-item label="商品价格，单位分" prop="price">
-          <el-input v-model="form.price" placeholder="请输入商品价格，单位分" />
+        <el-form-item label="商品类型" prop="classId">
+          <!-- <el-input v-model="form.classId" placeholder="请输入商品类型" /> -->
+          <el-select v-model="form.classId" placeholder="请选择商品类型">
+            <el-option
+              v-for="item of skuClassOptions"
+              :key="item.classId"
+              :label="item.className"
+              :value="item.classId"
+            />
+          </el-select>
         </el-form-item>
-        <el-form-item label="商品类型Id" prop="classId">
-          <el-input v-model="form.classId" placeholder="请输入商品类型Id" />
+        <el-form-item label="规格" prop="unit">
+          <el-input v-model="form.unit" placeholder="请输入规格" />
+        </el-form-item>
+        <el-form-item label="商品图片" prop="skuImage">
+          <image-upload v-model="form.skuImage" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -132,19 +167,21 @@
 </template>
 
 <script setup name="Sku">
-import { listSku, getSku, delSku, addSku, updateSku } from "@/api/manage/sku";
+import { listSku, getSku, delSku, addSku, updateSku } from '@/api/manage/sku'
+import { listSkuClass } from '@/api/manage/skuClass'
+import { loadAllParams } from '@/api/page'
 
-const { proxy } = getCurrentInstance();
+const { proxy } = getCurrentInstance()
 
-const skuList = ref([]);
-const open = ref(false);
-const loading = ref(true);
-const showSearch = ref(true);
-const ids = ref([]);
-const single = ref(true);
-const multiple = ref(true);
-const total = ref(0);
-const title = ref("");
+const skuList = ref([])
+const open = ref(false)
+const loading = ref(true)
+const showSearch = ref(true)
+const ids = ref([])
+const single = ref(true)
+const multiple = ref(true)
+const total = ref(0)
+const title = ref('')
 
 const data = reactive({
   form: {},
@@ -152,46 +189,34 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     skuName: null,
-    classId: null,
+    classId: null
   },
   rules: {
-    skuName: [
-      { required: true, message: "商品名称不能为空", trigger: "blur" }
-    ],
-    skuImage: [
-      { required: true, message: "商品图片不能为空", trigger: "blur" }
-    ],
-    brandName: [
-      { required: true, message: "品牌不能为空", trigger: "blur" }
-    ],
-    unit: [
-      { required: true, message: "规格(净含量)不能为空", trigger: "blur" }
-    ],
-    price: [
-      { required: true, message: "商品价格，单位分不能为空", trigger: "blur" }
-    ],
-    classId: [
-      { required: true, message: "商品类型Id不能为空", trigger: "blur" }
-    ],
+    skuName: [{ required: true, message: '商品名称不能为空', trigger: 'blur' }],
+    skuImage: [{ required: true, message: '商品图片不能为空', trigger: 'blur' }],
+    brandName: [{ required: true, message: '品牌不能为空', trigger: 'blur' }],
+    unit: [{ required: true, message: '规格(净含量)不能为空', trigger: 'blur' }],
+    price: [{ required: true, message: '商品价格，单位分不能为空', trigger: 'blur' }],
+    classId: [{ required: true, message: '商品类型Id不能为空', trigger: 'blur' }]
   }
-});
+})
 
-const { queryParams, form, rules } = toRefs(data);
+const { queryParams, form, rules } = toRefs(data)
 
 /** 查询商品管理列表 */
 function getList() {
-  loading.value = true;
+  loading.value = true
   listSku(queryParams.value).then(response => {
-    skuList.value = response.rows;
-    total.value = response.total;
-    loading.value = false;
-  });
+    skuList.value = response.rows
+    total.value = response.total
+    loading.value = false
+  })
 }
 
 // 取消按钮
 function cancel() {
-  open.value = false;
-  reset();
+  open.value = false
+  reset()
 }
 
 // 表单重置
@@ -207,85 +232,105 @@ function reset() {
     isDiscount: null,
     createTime: null,
     updateTime: null
-  };
-  proxy.resetForm("skuRef");
+  }
+  proxy.resetForm('skuRef')
 }
 
 /** 搜索按钮操作 */
 function handleQuery() {
-  queryParams.value.pageNum = 1;
-  getList();
+  queryParams.value.pageNum = 1
+  getList()
 }
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef");
-  handleQuery();
+  proxy.resetForm('queryRef')
+  handleQuery()
 }
 
 // 多选框选中数据
 function handleSelectionChange(selection) {
-  ids.value = selection.map(item => item.skuId);
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
+  ids.value = selection.map(item => item.skuId)
+  single.value = selection.length != 1
+  multiple.value = !selection.length
 }
 
 /** 新增按钮操作 */
 function handleAdd() {
-  reset();
-  open.value = true;
-  title.value = "添加商品管理";
+  reset()
+  open.value = true
+  title.value = '添加商品管理'
 }
 
 /** 修改按钮操作 */
 function handleUpdate(row) {
-  reset();
+  reset()
   const _skuId = row.skuId || ids.value
   getSku(_skuId).then(response => {
-    form.value = response.data;
-    open.value = true;
-    title.value = "修改商品管理";
-  });
+    form.value = response.data
+    form.value.price /= 100 // 转换单位
+    open.value = true
+    title.value = '修改商品管理'
+  })
 }
 
 /** 提交按钮 */
 function submitForm() {
-  proxy.$refs["skuRef"].validate(valid => {
+  proxy.$refs['skuRef'].validate(valid => {
     if (valid) {
+      // 将商品价格转换为“分”的单位
+      form.value.price *= 100
       if (form.value.skuId != null) {
         updateSku(form.value).then(response => {
-          proxy.$modal.msgSuccess("修改成功");
-          open.value = false;
-          getList();
-        });
+          proxy.$modal.msgSuccess('修改成功')
+          open.value = false
+          getList()
+        })
       } else {
         addSku(form.value).then(response => {
-          proxy.$modal.msgSuccess("新增成功");
-          open.value = false;
-          getList();
-        });
+          proxy.$modal.msgSuccess('新增成功')
+          open.value = false
+          getList()
+        })
       }
     }
-  });
+  })
 }
 
 /** 删除按钮操作 */
 function handleDelete(row) {
-  const _skuIds = row.skuId || ids.value;
-  proxy.$modal.confirm('是否确认删除商品管理编号为"' + _skuIds + '"的数据项？').then(function() {
-    return delSku(_skuIds);
-  }).then(() => {
-    getList();
-    proxy.$modal.msgSuccess("删除成功");
-  }).catch(() => {});
+  const _skuIds = row.skuId || ids.value
+  proxy.$modal
+    .confirm('是否确认删除商品管理编号为"' + _skuIds + '"的数据项？')
+    .then(function () {
+      return delSku(_skuIds)
+    })
+    .then(() => {
+      getList()
+      proxy.$modal.msgSuccess('删除成功')
+    })
+    .catch(() => {})
 }
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('manage/sku/export', {
-    ...queryParams.value
-  }, `sku_${new Date().getTime()}.xlsx`)
+  proxy.download(
+    'manage/sku/export',
+    {
+      ...queryParams.value
+    },
+    `sku_${new Date().getTime()}.xlsx`
+  )
 }
 
-getList();
+/** 查询商品类型列表 */
+const skuClassOptions = ref([])
+const fetchSkuClassList = () => {
+  listSkuClass(loadAllParams).then(res => {
+    skuClassOptions.value = res.rows
+  })
+}
+
+fetchSkuClassList()
+getList()
 </script>
