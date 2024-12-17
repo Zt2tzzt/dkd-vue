@@ -37,6 +37,8 @@ import Editor from "@/components/Editor"
 import FileUpload from "@/components/FileUpload"
 // 图片上传组件
 import ImageUpload from "@/components/ImageUpload"
+// Excel 导入组件
+import ExcelUpload from '@/components/ExcelUpload'
 // 图片预览组件
 import ImagePreview from "@/components/ImagePreview"
 // 自定义树选择组件
@@ -62,6 +64,7 @@ app.component('Pagination', Pagination)
 app.component('TreeSelect', TreeSelect)
 app.component('FileUpload', FileUpload)
 app.component('ImageUpload', ImageUpload)
+app.component('ExcelUpload', ExcelUpload)
 app.component('ImagePreview', ImagePreview)
 app.component('RightToolbar', RightToolbar)
 app.component('Editor', Editor)

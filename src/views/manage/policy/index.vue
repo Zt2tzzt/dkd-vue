@@ -255,7 +255,7 @@ const vmList = ref([])
 const policyinfoOpen = ref(false)
 const handlePolicyInfo = row => {
   // 获取策略信息
-  form.value = row // 将 row 赋值给 form，以便展示策略名称
+  form.value = row // 将 row 赋值给 form，以便在对话框中展示策略名称
   loadAllParams.policyId = row.policyId
 
   // 根据策略 id，查询设备列表

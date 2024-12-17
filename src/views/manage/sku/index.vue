@@ -64,6 +64,16 @@
           >导出</el-button
         >
       </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="upload"
+          @click="handleImport"
+          v-hasPermi="['manage:sku:add']"
+          >导入</el-button
+        >
+      </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -162,6 +172,11 @@
           <el-button @click="cancel">取 消</el-button>
         </div>
       </template>
+    </el-dialog>
+
+    <!-- 导入对话框 -->
+    <el-dialog title="数据导入" v-model="excelOpen" width="400px" append-to-body>
+      <ExcelUpload url="/manage/sku/import" @uploadFinish="handleUploadFinish" />
     </el-dialog>
   </div>
 </template>
@@ -321,6 +336,14 @@ function handleExport() {
     },
     `sku_${new Date().getTime()}.xlsx`
   )
+}
+
+/** 导入按钮操作 */
+const excelOpen = ref(false)
+const handleImport = () => (excelOpen.value = true)
+const handleUploadFinish = () => {
+  excelOpen.value = false
+  getList()
 }
 
 /** 查询商品类型列表 */
