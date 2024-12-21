@@ -4,6 +4,10 @@ const { proxy } = getCurrentInstance()
 
 // 文件上传前的校验
 const props = defineProps({
+  url: {
+    type: String,
+    required: true
+  },
   // 大小限制(MB)
   fileSize: {
     type: Number,
@@ -13,10 +17,6 @@ const props = defineProps({
   fileType: {
     type: Array,
     default: () => ['xls', 'xlsx']
-  },
-  url: {
-    type: String,
-    required: true
   }
 })
 
@@ -26,9 +26,8 @@ const emits = defineEmits(['closeDialog'])
 const uploadRef = ref(null)
 const uploadExcelUrl = ref(import.meta.env.VITE_APP_BASE_API + props.url) // 上传地址
 const headers = ref({ Authorization: 'Bearer ' + getToken() }) // 上传请求头
-const submitUpload = () => {
-  uploadRef.value.submit()
-}
+const submitUpload = () => uploadRef.value.submit()
+
 // 上传成功回调
 const handleUploadSuccess = (res, file) => {
   if (res.code === 200) {
@@ -39,13 +38,13 @@ const handleUploadSuccess = (res, file) => {
   }
 
   uploadRef.value.clearFiles()
-  console.log('haha')
   proxy.$modal.closeLoading() // 关闭 loading 层
 }
 
 // 上传失败回掉
 const handleUploadError = () => {
   proxy.$modal.msgError('上传失败')
+
   uploadRef.value.clearFiles()
   proxy.$modal.closeLoading() // 关闭 loading 层
 }
@@ -53,16 +52,16 @@ const handleUploadError = () => {
 // 上传前loading加载
 const handleBeforeUpload = file => {
   let isExcel = false
+
   if (props.fileType.length) {
     let fileExtension = ''
-    if (file.name.lastIndexOf('.') > -1) {
+
+    if (file.name.lastIndexOf('.') > -1)
       fileExtension = file.name.slice(file.name.lastIndexOf('.') + 1)
-    }
-    isExcel = props.fileType.some(type => {
-      if (file.type.indexOf(type) > -1) return true
-      if (fileExtension && fileExtension.indexOf(type) > -1) return true
-      return false
-    })
+
+    isExcel = props.fileType.some(
+      type => file.type.indexOf(type) > -1 || (fileExtension && fileExtension.indexOf(type) > -1)
+    )
   }
   if (!isExcel) {
     proxy.$modal.msgError(`文件格式不正确, 请上传${props.fileType.join('/')}格式文件!`)
@@ -82,14 +81,14 @@ const handleBeforeUpload = file => {
 <template>
   <!-- 导入对话框 -->
   <el-upload
-    ref="uploadRef"
     class="upload-demo"
+    ref="uploadRef"
     :action="uploadExcelUrl"
     :headers="headers"
+    :limit="1"
+    :before-upload="handleBeforeUpload"
     :on-success="handleUploadSuccess"
     :on-error="handleUploadError"
-    :before-upload="handleBeforeUpload"
-    :limit="1"
     :auto-upload="false"
   >
     <template #trigger>

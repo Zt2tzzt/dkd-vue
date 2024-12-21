@@ -189,7 +189,7 @@
     </el-dialog>
 
     <!-- 查看详情对话框 -->
-    <el-dialog title="vmInfoTitle" v-model="vmInfoOpen" width="750px" append-to-body>
+    <el-dialog :title="vmInfoTitle" v-model="vmInfoOpen" width="750px" append-to-body>
       <el-table :data="vmList">
         <el-table-column label="序号" type="index" align="center" width="50" />
         <el-table-column label="设备编号" align="center" prop="innerCode" />
