@@ -91,6 +91,13 @@
           <el-button
             link
             type="primary"
+            @click="handleGoods(scope.row)"
+            v-hasPermi="['manage:vm:edit']"
+            >货道</el-button
+          >
+          <el-button
+            link
+            type="primary"
             @click="handlePolicy(scope.row)"
             v-hasPermi="['manage:vm:edit']"
             >策略</el-button
@@ -197,6 +204,13 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 货道组件 -->
+    <ChannelDialog
+      :goodVisible="goodVisible"
+      :goodData="goodData"
+      @handleCloseGood="handleCloseGood"
+    ></ChannelDialog>
   </div>
 </template>
 
@@ -206,9 +220,10 @@ import { listVmType } from '@/api/manage/vmType'
 import { listPartner } from '@/api/manage/partner'
 import { listNode } from '@/api/manage/node'
 import { listRegion } from '@/api/manage/region'
-import { listPolicy } from '@/api/manage/policy';
+import { listPolicy } from '@/api/manage/policy'
 import { loadAllParams } from '@/api/page'
 // import { parseTime } from 'element-plus/es/components/time-select/src/utils.mjs'
+import ChannelDialog from './components/ChannelDialog.vue'
 
 const { proxy } = getCurrentInstance()
 const { vm_status } = proxy.useDict('vm_status')
@@ -425,4 +440,21 @@ getNodeList()
 getVmTypeList()
 getPartnerList()
 getList()
+
+// ********************货道********************
+// 货道组件
+const goodVisible = ref(false) //货道弹层显示隐藏
+const goodData = ref({}) //货道信息用来拿取 vmTypeId和innerCode
+// 打开货道弹层
+const handleGoods = row => {
+  goodVisible.value = true
+  goodData.value = row
+}
+// 关闭货道弹层
+const handleCloseGood = () => {
+  goodVisible.value = false
+}
+// ********************货道end********************
 </script>
+
+<style lang="scss" scoped src="./index.scss"></style>
