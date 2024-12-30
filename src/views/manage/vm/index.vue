@@ -443,8 +443,8 @@ getList()
 
 // ********************货道********************
 // 货道组件
-const goodVisible = ref(false) //货道弹层显示隐藏
-const goodData = ref({}) //货道信息用来拿取 vmTypeId和innerCode
+const goodVisible = ref(false) // 货道弹层显示隐藏
+const goodData = ref({}) // 货道信息用来拿取 vmTypeId 和 innerCode
 // 打开货道弹层
 const handleGoods = row => {
   goodVisible.value = true

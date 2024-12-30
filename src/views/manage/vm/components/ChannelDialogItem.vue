@@ -6,20 +6,18 @@
     <div class="sku">
       <img
         class="img"
-        :src="channel.sku&&channel.sku.skuImage
+        :src="
+          channel.sku && channel.sku.skuImage
             ? channel.sku.skuImage
-            : require('@/assets/vm/default_sku.png')"
+            : require('@/assets/vm/default_sku.png')
+        "
       />
       <div class="name" :title="channel.sku ? channel.sku.skuName : '暂无商品'">
         {{ channel.sku ? channel.sku.skuName : '暂无商品' }}
       </div>
     </div>
     <div>
-      <el-button
-        type="text"
-        class="el-button--primary-text"
-        @click="handleSetClick"
-      >
+      <el-button type="text" class="el-button--primary-text" @click="handleSetClick">
         添加
       </el-button>
       <el-button
@@ -34,26 +32,26 @@
   </div>
 </template>
 <script setup>
-import { require } from '@/utils/validate';
+import { require } from '@/utils/validate'
 const props = defineProps({
   currentIndex: {
     type: Number,
-    default: 0,
+    default: 0
   },
   channel: {
     type: Object,
-    default: () => {},
-  },
-});
-const emit = defineEmits(['openSetSkuDialog','openRemoveSkuDialog']);
+    default: () => {}
+  }
+})
+const emit = defineEmits(['openSetSkuDialog', 'openRemoveSkuDialog'])
 // 添加商品
 const handleSetClick = () => {
-  emit('openSetSkuDialog', props.currentIndex, props.channel.channelCode);
-};
+  emit('openSetSkuDialog', props.currentIndex, props.channel.channelCode)
+}
 // 删除产品
 const handleRemoveClick = () => {
-  emit('openRemoveSkuDialog', props.currentIndex, props.channel.channelCode);
-};
+  emit('openRemoveSkuDialog', props.currentIndex, props.channel.channelCode)
+}
 </script>
 <style scoped lang="scss">
 @import '@/assets/styles/variables.module.scss';

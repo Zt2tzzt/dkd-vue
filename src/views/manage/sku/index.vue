@@ -174,7 +174,7 @@
       </template>
     </el-dialog>
 
-    <!-- 导入对话框 -->
+    <!-- 导入 Excel 对话框 -->
     <el-dialog title="数据导入" v-model="excelOpen" width="400px" append-to-body>
       <ExcelUpload url="/manage/sku/import" @uploadFinish="handleUploadFinish" />
     </el-dialog>
