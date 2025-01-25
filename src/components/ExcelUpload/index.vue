@@ -20,7 +20,7 @@ const props = defineProps({
   }
 })
 
-const emits = defineEmits(['closeDialog'])
+const emits = defineEmits(['uploadFinish'])
 
 /** 文件上传 */
 const uploadRef = ref(null)
