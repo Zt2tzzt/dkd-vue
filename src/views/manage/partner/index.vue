@@ -80,7 +80,12 @@
       <!-- <el-table-column label="密码" align="center" prop="password" /> -->
       <el-table-column label="联系人" align="center" prop="contactPerson" />
       <el-table-column label="联系电话" align="center" prop="contactPhone" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="300px">
+      <el-table-column
+        label="操作"
+        align="center"
+        class-name="small-padding fixed-width"
+        width="300px"
+      >
         <template #default="scope">
           <el-button
             link
@@ -92,7 +97,7 @@
           <el-button
             link
             type="primary"
-    @click="handleDetail(scope.row)"
+            @click="handleDetail(scope.row)"
             v-hasPermi="['manage:partner:query']"
             >查看详情</el-button
           >
