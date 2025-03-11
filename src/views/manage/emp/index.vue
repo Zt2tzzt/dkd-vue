@@ -1,6 +1,12 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form
+      :model="queryParams"
+      ref="queryRef"
+      :inline="true"
+      v-show="showSearch"
+      label-width="68px"
+    >
       <el-form-item label="人员名称" prop="userName">
         <el-input
           v-model="queryParams.userName"
@@ -57,7 +63,8 @@
           icon="Plus"
           @click="handleAdd"
           v-hasPermi="['manage:emp:add']"
-        >新增</el-button>
+          >新增</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -67,7 +74,8 @@
           :disabled="single"
           @click="handleUpdate"
           v-hasPermi="['manage:emp:edit']"
-        >修改</el-button>
+          >修改</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -77,7 +85,8 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['manage:emp:remove']"
-        >删除</el-button>
+          >删除</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -86,7 +95,8 @@
           icon="Download"
           @click="handleExport"
           v-hasPermi="['manage:emp:export']"
-        >导出</el-button>
+          >导出</el-button
+        >
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -101,14 +111,26 @@
       <el-table-column label="联系电话" align="center" prop="mobile" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" @click="handleUpdate(scope.row)" v-hasPermi="['manage:emp:edit']">修改</el-button>
-          <el-button link type="primary" @click="handleDelete(scope.row)" v-hasPermi="['manage:emp:remove']">删除</el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleUpdate(scope.row)"
+            v-hasPermi="['manage:emp:edit']"
+            >修改</el-button
+          >
+          <el-button
+            link
+            type="primary"
+            @click="handleDelete(scope.row)"
+            v-hasPermi="['manage:emp:remove']"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
 
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       v-model:page="queryParams.pageNum"
       v-model:limit="queryParams.pageSize"
@@ -150,7 +172,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="员工头像" prop="image">
-          <image-upload v-model="form.image"/>
+          <image-upload v-model="form.image" />
         </el-form-item>
         <el-form-item label="是否启用" prop="status">
           <el-select v-model="form.status" placeholder="请选择是否启用">
@@ -174,23 +196,23 @@
 </template>
 
 <script setup name="Emp">
-import { listEmp, getEmp, delEmp, addEmp, updateEmp } from "@/api/manage/emp";
-import { listRole } from '@/api/manage/role';
-import { listRegion } from '@/api/manage/region';
-import { loadAllParams } from '@/api/page';
+import { listEmp, getEmp, delEmp, addEmp, updateEmp } from '@/api/manage/emp'
+import { listRole } from '@/api/manage/role'
+import { listRegion } from '@/api/manage/region'
+import { loadAllParams } from '@/api/page'
 
-const { proxy } = getCurrentInstance();
-const { emp_status } = proxy.useDict('emp_status');
+const { proxy } = getCurrentInstance()
+const { emp_status } = proxy.useDict('emp_status')
 
-const empList = ref([]);
-const open = ref(false);
-const loading = ref(true);
-const showSearch = ref(true);
-const ids = ref([]);
-const single = ref(true);
-const multiple = ref(true);
-const total = ref(0);
-const title = ref("");
+const empList = ref([])
+const open = ref(false)
+const loading = ref(true)
+const showSearch = ref(true)
+const ids = ref([])
+const single = ref(true)
+const multiple = ref(true)
+const total = ref(0)
+const title = ref('')
 
 const data = reactive({
   form: {},
@@ -201,46 +223,34 @@ const data = reactive({
     regionId: null,
     roleId: null,
     roleCode: null,
-    status: null,
+    status: null
   },
   rules: {
-    userName: [
-      { required: true, message: "人员名称不能为空", trigger: "blur" }
-    ],
-    regionId: [
-      { required: true, message: "所属区域Id不能为空", trigger: "blur" }
-    ],
-    roleId: [
-      { required: true, message: "角色id不能为空", trigger: "blur" }
-    ],
-    mobile: [
-      { required: true, message: "联系电话不能为空", trigger: "blur" }
-    ],
-    image: [
-      { required: true, message: "员工头像不能为空", trigger: "blur" }
-    ],
-    status: [
-      { required: true, message: "是否启用不能为空", trigger: "change" }
-    ],
+    userName: [{ required: true, message: '人员名称不能为空', trigger: 'blur' }],
+    regionId: [{ required: true, message: '所属区域Id不能为空', trigger: 'blur' }],
+    roleId: [{ required: true, message: '角色id不能为空', trigger: 'blur' }],
+    mobile: [{ required: true, message: '联系电话不能为空', trigger: 'blur' }],
+    image: [{ required: true, message: '员工头像不能为空', trigger: 'blur' }],
+    status: [{ required: true, message: '是否启用不能为空', trigger: 'change' }]
   }
-});
+})
 
-const { queryParams, form, rules } = toRefs(data);
+const { queryParams, form, rules } = toRefs(data)
 
 /** 查询人员列表列表 */
 function getList() {
-  loading.value = true;
+  loading.value = true
   listEmp(queryParams.value).then(response => {
-    empList.value = response.rows;
-    total.value = response.total;
-    loading.value = false;
-  });
+    empList.value = response.rows
+    total.value = response.total
+    loading.value = false
+  })
 }
 
 // 取消按钮
 function cancel() {
-  open.value = false;
-  reset();
+  open.value = false
+  reset()
 }
 
 // 表单重置
@@ -258,103 +268,111 @@ function reset() {
     status: null,
     createTime: null,
     updateTime: null
-  };
-  proxy.resetForm("empRef");
+  }
+  proxy.resetForm('empRef')
 }
 
 /** 搜索按钮操作 */
 function handleQuery() {
-  queryParams.value.pageNum = 1;
-  getList();
+  queryParams.value.pageNum = 1
+  getList()
 }
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef");
-  handleQuery();
+  proxy.resetForm('queryRef')
+  handleQuery()
 }
 
 // 多选框选中数据
 function handleSelectionChange(selection) {
-  ids.value = selection.map(item => item.id);
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
+  ids.value = selection.map(item => item.id)
+  single.value = selection.length != 1
+  multiple.value = !selection.length
 }
 
 /** 新增按钮操作 */
 function handleAdd() {
-  reset();
-  open.value = true;
-  title.value = "添加人员列表";
+  reset()
+  open.value = true
+  title.value = '添加人员列表'
 }
 
 /** 修改按钮操作 */
 function handleUpdate(row) {
-  reset();
+  reset()
   const _id = row.id || ids.value
   getEmp(_id).then(response => {
-    form.value = response.data;
-    open.value = true;
-    title.value = "修改人员列表";
-  });
+    form.value = response.data
+    open.value = true
+    title.value = '修改人员列表'
+  })
 }
 
 /** 提交按钮 */
 function submitForm() {
-  proxy.$refs["empRef"].validate(valid => {
+  proxy.$refs['empRef'].validate(valid => {
     if (valid) {
       if (form.value.id != null) {
         updateEmp(form.value).then(response => {
-          proxy.$modal.msgSuccess("修改成功");
-          open.value = false;
-          getList();
-        });
+          proxy.$modal.msgSuccess('修改成功')
+          open.value = false
+          getList()
+        })
       } else {
         addEmp(form.value).then(response => {
-          proxy.$modal.msgSuccess("新增成功");
-          open.value = false;
-          getList();
-        });
+          proxy.$modal.msgSuccess('新增成功')
+          open.value = false
+          getList()
+        })
       }
     }
-  });
+  })
 }
 
 /** 删除按钮操作 */
 function handleDelete(row) {
-  const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除人员列表编号为"' + _ids + '"的数据项？').then(function() {
-    return delEmp(_ids);
-  }).then(() => {
-    getList();
-    proxy.$modal.msgSuccess("删除成功");
-  }).catch(() => {});
+  const _ids = row.id || ids.value
+  proxy.$modal
+    .confirm('是否确认删除人员列表编号为"' + _ids + '"的数据项？')
+    .then(function () {
+      return delEmp(_ids)
+    })
+    .then(() => {
+      getList()
+      proxy.$modal.msgSuccess('删除成功')
+    })
+    .catch(() => {})
 }
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('manage/emp/export', {
-    ...queryParams.value
-  }, `emp_${new Date().getTime()}.xlsx`)
+  proxy.download(
+    'manage/emp/export',
+    {
+      ...queryParams.value
+    },
+    `emp_${new Date().getTime()}.xlsx`
+  )
 }
 
-const roleList = ref([]);
+const roleList = ref([])
 /** 查询角色列表 */
 function getRoleList() {
   listRole(loadAllParams).then(res => {
-    roleList.value = res.rows;
-  });
+    roleList.value = res.rows
+  })
 }
 
-const regionList = ref([]);
+const regionList = ref([])
 /** 查询区域列表 */
 function getRegionList() {
   listRegion(loadAllParams).then(res => {
-    regionList.value = res.rows;
-  });
+    regionList.value = res.rows
+  })
 }
 
-getRegionList();
-getRoleList();
-getList();
+getRegionList()
+getRoleList()
+getList()
 </script>
